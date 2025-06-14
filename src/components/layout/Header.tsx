@@ -1,12 +1,16 @@
 
 import React from 'react';
 import { Bell, Search, User } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
+import LogoutButton from '../auth/LogoutButton';
 
 interface HeaderProps {
   userRole: string;
 }
 
 const Header: React.FC<HeaderProps> = ({ userRole }) => {
+  const { user } = useAuth();
+
   return (
     <header className="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
       <div className="flex items-center justify-between">
@@ -31,9 +35,15 @@ const Header: React.FC<HeaderProps> = ({ userRole }) => {
             <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
           </button>
           
-          <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
-            <User size={20} />
-          </button>
+          <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 px-3 py-2 bg-gray-100 rounded-lg">
+              <User size={16} className="text-gray-600" />
+              <span className="text-sm font-medium text-gray-700">
+                {user?.name || 'Unknown User'}
+              </span>
+            </div>
+            <LogoutButton />
+          </div>
         </div>
       </div>
     </header>

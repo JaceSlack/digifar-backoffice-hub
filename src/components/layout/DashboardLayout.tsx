@@ -3,17 +3,20 @@ import React from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Header from './Header';
+import { useAuth } from '../../contexts/AuthContext';
 
-interface DashboardLayoutProps {
-  userRole: string;
-}
+const DashboardLayout: React.FC = () => {
+  const { user } = useAuth();
+  
+  if (!user) {
+    return null; // Should not happen due to ProtectedRoute, but safety check
+  }
 
-const DashboardLayout: React.FC<DashboardLayoutProps> = ({ userRole }) => {
   return (
     <div className="min-h-screen bg-gray-50 flex">
-      <Sidebar userRole={userRole} />
+      <Sidebar userRole={user.role} />
       <div className="flex-1 flex flex-col">
-        <Header userRole={userRole} />
+        <Header userRole={user.role} />
         <main className="flex-1 p-6 overflow-auto">
           <Outlet />
         </main>
