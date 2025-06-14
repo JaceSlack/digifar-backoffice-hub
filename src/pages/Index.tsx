@@ -1,14 +1,21 @@
-// Update this page (the content is just a fallback if you fail to update the page)
 
-const Index = () => {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
-    </div>
-  );
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import RoleSelector from '../components/auth/RoleSelector';
+
+interface IndexProps {
+  onRoleSelect: (role: string) => void;
+}
+
+const Index: React.FC<IndexProps> = ({ onRoleSelect }) => {
+  const navigate = useNavigate();
+
+  const handleRoleSelect = (role: string) => {
+    onRoleSelect(role);
+    navigate(`/dashboard/${role}`);
+  };
+
+  return <RoleSelector onRoleSelect={handleRoleSelect} />;
 };
 
 export default Index;
