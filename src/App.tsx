@@ -10,6 +10,7 @@ import NotFound from "./pages/NotFound";
 import AccessDenied from "./pages/AccessDenied";
 import DashboardLayout from "./components/layout/DashboardLayout";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
+import DashboardRedirect from "./components/auth/DashboardRedirect";
 import SuperadminDashboard from "./dashboards/superadmin/SuperadminDashboard";
 import AdminDashboard from "./dashboards/admin/AdminDashboard";
 import FinanceDashboard from "./dashboards/finance/FinanceDashboard";
@@ -62,7 +63,7 @@ const App = () => {
               
               {/* Dashboard Routes */}
               <Route path="/dashboard" element={<DashboardLayout />}>
-                <Route index element={<Navigate to="/login" replace />} />
+                <Route index element={<DashboardRedirect />} />
                 
                 {/* Superadmin Routes */}
                 <Route 
