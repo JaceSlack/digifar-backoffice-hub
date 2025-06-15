@@ -37,14 +37,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log('AuthProvider - useEffect running');
     // Check for stored token on app load
     const storedToken = localStorage.getItem('auth_token');
     const storedUser = localStorage.getItem('auth_user');
+    
+    console.log('AuthProvider - storedToken:', storedToken);
+    console.log('AuthProvider - storedUser:', storedUser);
     
     if (storedToken && storedUser) {
       try {
         setToken(storedToken);
         setUser(JSON.parse(storedUser));
+        console.log('AuthProvider - restored user from localStorage');
       } catch (error) {
         console.error('Error parsing stored user data:', error);
         localStorage.removeItem('auth_token');
@@ -52,6 +57,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
     }
     setLoading(false);
+    console.log('AuthProvider - loading set to false');
   }, []);
 
   const login = async (email: string, password: string): Promise<void> => {
@@ -87,6 +93,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     loading,
   };
 
+  console.log('AuthProvider - current state:', { user: !!user, token: !!token, loading });
+
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
@@ -101,7 +109,7 @@ const mockLoginAPI = async (email: string, password: string) => {
     { email: 'admin@digifar.com', password: 'admin123', role: 'admin', name: 'Admin User', id: '2' },
     { email: 'finance@digifar.com', password: 'admin123', role: 'finance', name: 'Finance User', id: '3' },
     { email: 'support@digifar.com', password: 'admin123', role: 'support', name: 'Support User', id: '4' },
-    { email: 'internal@digifar.com', password: 'admin123', role: 'internal', name: 'Internal User', id: '5' },
+    { email: 'internal@digifar.com', password: 'internal123', role: 'internal', name: 'Internal User', id: '5' },
   ];
   
   const user = mockUsers.find(u => u.email === email && u.password === password);
