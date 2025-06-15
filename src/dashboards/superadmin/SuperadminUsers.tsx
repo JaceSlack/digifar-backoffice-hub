@@ -1,42 +1,123 @@
 
-import React from 'react';
+import React, { useState } from 'react';
+import { Users, UserPlus, UserCheck, UserX, Eye, Edit, Trash2 } from 'lucide-react';
 import StatsCard from '../../components/ui/StatsCard';
-import DataTable from '../../components/ui/DataTable';
-import { Users, UserPlus, UserCheck, UserX } from 'lucide-react';
-import { mockUsers } from '../../data/mockData';
+import { Button } from '../../components/ui/button';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../../components/ui/table";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../../components/ui/alert-dialog";
+import ViewDetailsModal from '../../components/modals/ViewDetailsModal';
+import EditUserModal from '../../components/modals/EditUserModal';
+import CreateUserModal from '../../components/modals/CreateUserModal';
+import { useToast } from '../../hooks/use-toast';
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  status: string;
+  lastLogin: string;
+}
 
 const SuperadminUsers: React.FC = () => {
-  const userColumns = [
-    { key: 'name', title: 'Name' },
-    { key: 'email', title: 'Email' },
-    { key: 'role', title: 'Role' },
-    { 
-      key: 'status', 
-      title: 'Status',
-      render: (value: string) => (
-        <span className={`px-2 py-1 rounded-full text-xs ${
-          value === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-        }`}>
-          {value}
-        </span>
-      )
-    },
-    { key: 'lastLogin', title: 'Last Login' },
-  ];
+  const { toast } = useToast();
+  const [users, setUsers] = useState<User[]>([
+    { id: '1', name: 'John Doe', email: 'john@digifar.com', role: 'Admin', status: 'Active', lastLogin: '2024-01-15' },
+    { id: '2', name: 'Jane Smith', email: 'jane@digifar.com', role: 'Finance', status: 'Active', lastLogin: '2024-01-14' },
+    { id: '3', name: 'Bob Wilson', email: 'bob@digifar.com', role: 'Support', status: 'Inactive', lastLogin: '2024-01-10' },
+    { id: '4', name: 'Alice Brown', email: 'alice@digifar.com', role: 'Internal', status: 'Active', lastLogin: '2024-01-15' },
+  ]);
+
+  const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+
+  const handleViewDetails = (user: User) => {
+    setSelectedUser(user);
+    setViewModalOpen(true);
+  };
+
+  const handleEdit = (user: User) => {
+    setSelectedUser(user);
+    setEditModalOpen(true);
+  };
+
+  const handleDelete = (user: User) => {
+    setSelectedUser(user);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (selectedUser) {
+      setUsers(prev => prev.filter(user => user.id !== selectedUser.id));
+      toast({
+        title: "User Deleted",
+        description: `${selectedUser.name} has been removed from the system.`,
+      });
+      setDeleteDialogOpen(false);
+      setSelectedUser(null);
+    }
+  };
+
+  const handleSaveUser = (updatedUser: User) => {
+    setUsers(prev => prev.map(user => 
+      user.id === updatedUser.id ? updatedUser : user
+    ));
+    toast({
+      title: "User Updated",
+      description: `${updatedUser.name} has been updated successfully.`,
+    });
+  };
+
+  const handleCreateUser = (newUser: { name: string; email: string; role: string }) => {
+    const userWithDefaults = {
+      ...newUser,
+      id: Date.now().toString(),
+      status: 'Active',
+      lastLogin: 'Never'
+    };
+    setUsers(prev => [...prev, userWithDefaults]);
+    toast({
+      title: "User Created",
+      description: `${newUser.name} has been added to the system.`,
+    });
+  };
+
+  const activeUsers = users.filter(user => user.status === 'Active').length;
+  const inactiveUsers = users.filter(user => user.status === 'Inactive').length;
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-gray-900">User Management</h1>
-        <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+        <Button onClick={() => setCreateModalOpen(true)}>
+          <UserPlus className="h-4 w-4 mr-2" />
           Add New User
-        </button>
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatsCard
           title="Total Users"
-          value="1,247"
+          value={users.length.toString()}
           change="+12% from last month"
           changeType="positive"
           icon={Users}
@@ -52,27 +133,119 @@ const SuperadminUsers: React.FC = () => {
         />
         <StatsCard
           title="Active Users"
-          value="1,158"
-          change="93% active rate"
+          value={activeUsers.toString()}
+          change={`${Math.round((activeUsers/users.length)*100)}% active rate`}
           changeType="positive"
           icon={UserCheck}
           iconColor="text-emerald-600"
         />
         <StatsCard
           title="Inactive Users"
-          value="89"
-          change="-5% from last month"
-          changeType="positive"
+          value={inactiveUsers.toString()}
+          change={`${Math.round((inactiveUsers/users.length)*100)}% inactive`}
+          changeType="neutral"
           icon={UserX}
           iconColor="text-red-600"
         />
       </div>
 
-      <DataTable
-        title="All Users"
-        data={mockUsers}
-        columns={userColumns}
+      <div className="bg-white rounded-lg shadow border border-gray-200">
+        <div className="px-6 py-4 border-b border-gray-200">
+          <h3 className="text-lg font-semibold text-gray-900">All Users</h3>
+        </div>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Name</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Role</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Last Login</TableHead>
+              <TableHead>Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {users.map((user) => (
+              <TableRow key={user.id}>
+                <TableCell>{user.name}</TableCell>
+                <TableCell>{user.email}</TableCell>
+                <TableCell>{user.role}</TableCell>
+                <TableCell>
+                  <span className={`px-2 py-1 rounded-full text-xs ${
+                    user.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                  }`}>
+                    {user.status}
+                  </span>
+                </TableCell>
+                <TableCell>{user.lastLogin}</TableCell>
+                <TableCell>
+                  <div className="flex space-x-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleViewDetails(user)}
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleEdit(user)}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDelete(user)}
+                      className="text-red-600 hover:text-red-700"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+
+      <ViewDetailsModal
+        isOpen={viewModalOpen}
+        onClose={() => setViewModalOpen(false)}
+        title={`${selectedUser?.name} Details`}
+        data={selectedUser || {}}
       />
+
+      <EditUserModal
+        isOpen={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
+        user={selectedUser}
+        onSave={handleSaveUser}
+      />
+
+      <CreateUserModal
+        isOpen={createModalOpen}
+        onClose={() => setCreateModalOpen(false)}
+        onCreate={handleCreateUser}
+      />
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete User</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete {selectedUser?.name}? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-red-600 hover:bg-red-700">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

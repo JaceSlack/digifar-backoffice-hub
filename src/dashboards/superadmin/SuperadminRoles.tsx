@@ -1,21 +1,70 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Shield, Users, Settings, Eye } from 'lucide-react';
+import ViewDetailsModal from '../../components/modals/ViewDetailsModal';
+import EditRoleModal from '../../components/modals/EditRoleModal';
+import CreateRoleModal from '../../components/modals/CreateRoleModal';
+import { useToast } from '../../hooks/use-toast';
+
+interface Role {
+  name: string;
+  users: number;
+  permissions: string;
+  description: string;
+}
 
 const SuperadminRoles: React.FC = () => {
-  const roles = [
+  const { toast } = useToast();
+  const [roles, setRoles] = useState<Role[]>([
     { name: 'Superadmin', users: 2, permissions: 'Full Access', description: 'Complete system control' },
     { name: 'Admin', users: 15, permissions: 'Merchant Management', description: 'Manage merchants and approvals' },
     { name: 'Finance', users: 8, permissions: 'Financial Operations', description: 'Handle payouts and reconciliation' },
     { name: 'Support', users: 25, permissions: 'Customer Support', description: 'Handle tickets and user issues' },
     { name: 'Internal', users: 12, permissions: 'Analytics & Reports', description: 'View reports and analytics' },
-  ];
+  ]);
+
+  const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [selectedRole, setSelectedRole] = useState<Role | null>(null);
+
+  const handleViewDetails = (role: Role) => {
+    setSelectedRole(role);
+    setViewModalOpen(true);
+  };
+
+  const handleEdit = (role: Role) => {
+    setSelectedRole(role);
+    setEditModalOpen(true);
+  };
+
+  const handleSaveRole = (updatedRole: Role) => {
+    setRoles(prev => prev.map(role => 
+      role.name === selectedRole?.name ? updatedRole : role
+    ));
+    toast({
+      title: "Role Updated",
+      description: `${updatedRole.name} role has been updated successfully.`,
+    });
+  };
+
+  const handleCreateRole = (newRole: { name: string; permissions: string; description: string }) => {
+    const roleWithUsers = { ...newRole, users: 0 };
+    setRoles(prev => [...prev, roleWithUsers]);
+    toast({
+      title: "Role Created",
+      description: `${newRole.name} role has been created successfully.`,
+    });
+  };
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-gray-900">Role Management</h1>
-        <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+        <button 
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+          onClick={() => setCreateModalOpen(true)}
+        >
           Create New Role
         </button>
       </div>
@@ -46,11 +95,17 @@ const SuperadminRoles: React.FC = () => {
               </div>
               
               <div className="flex space-x-2">
-                <button className="flex items-center space-x-1 px-3 py-1 bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100">
+                <button 
+                  className="flex items-center space-x-1 px-3 py-1 bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100"
+                  onClick={() => handleViewDetails(role)}
+                >
                   <Eye className="h-4 w-4" />
                   <span>View Details</span>
                 </button>
-                <button className="flex items-center space-x-1 px-3 py-1 bg-gray-50 text-gray-600 rounded-md hover:bg-gray-100">
+                <button 
+                  className="flex items-center space-x-1 px-3 py-1 bg-gray-50 text-gray-600 rounded-md hover:bg-gray-100"
+                  onClick={() => handleEdit(role)}
+                >
                   <Settings className="h-4 w-4" />
                   <span>Edit</span>
                 </button>
@@ -59,6 +114,26 @@ const SuperadminRoles: React.FC = () => {
           </div>
         ))}
       </div>
+
+      <ViewDetailsModal
+        isOpen={viewModalOpen}
+        onClose={() => setViewModalOpen(false)}
+        title={`${selectedRole?.name} Role Details`}
+        data={selectedRole || {}}
+      />
+
+      <EditRoleModal
+        isOpen={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
+        role={selectedRole}
+        onSave={handleSaveRole}
+      />
+
+      <CreateRoleModal
+        isOpen={createModalOpen}
+        onClose={() => setCreateModalOpen(false)}
+        onCreate={handleCreateRole}
+      />
     </div>
   );
 };
