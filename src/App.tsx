@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -77,6 +78,38 @@ const App = () => {
                   element={
                     <ProtectedRoute allowedRoles={['superadmin']}>
                       <SuperadminDashboard />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="superadmin/users" 
+                  element={
+                    <ProtectedRoute allowedRoles={['superadmin']}>
+                      <SuperadminUsers />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="superadmin/roles" 
+                  element={
+                    <ProtectedRoute allowedRoles={['superadmin']}>
+                      <SuperadminRoles />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="superadmin/analytics" 
+                  element={
+                    <ProtectedRoute allowedRoles={['superadmin']}>
+                      <SuperadminAnalytics />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="superadmin/config" 
+                  element={
+                    <ProtectedRoute allowedRoles={['superadmin']}>
+                      <SuperadminConfig />
                     </ProtectedRoute>
                   } 
                 />
