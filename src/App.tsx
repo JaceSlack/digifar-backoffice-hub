@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -61,8 +60,15 @@ const App = () => {
               <Route path="/403" element={<AccessDenied />} />
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
               
-              {/* Dashboard Routes */}
-              <Route path="/dashboard" element={<DashboardLayout />}>
+              {/* Dashboard Routes - Wrapped in ProtectedRoute */}
+              <Route 
+                path="/dashboard" 
+                element={
+                  <ProtectedRoute allowedRoles={['superadmin', 'admin', 'finance', 'support', 'internal']}>
+                    <DashboardLayout />
+                  </ProtectedRoute>
+                }
+              >
                 <Route index element={<DashboardRedirect />} />
                 
                 {/* Superadmin Routes */}
@@ -71,38 +77,6 @@ const App = () => {
                   element={
                     <ProtectedRoute allowedRoles={['superadmin']}>
                       <SuperadminDashboard />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="superadmin/users" 
-                  element={
-                    <ProtectedRoute allowedRoles={['superadmin']}>
-                      <SuperadminUsers />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="superadmin/roles" 
-                  element={
-                    <ProtectedRoute allowedRoles={['superadmin']}>
-                      <SuperadminRoles />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="superadmin/analytics" 
-                  element={
-                    <ProtectedRoute allowedRoles={['superadmin']}>
-                      <SuperadminAnalytics />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="superadmin/config" 
-                  element={
-                    <ProtectedRoute allowedRoles={['superadmin']}>
-                      <SuperadminConfig />
                     </ProtectedRoute>
                   } 
                 />

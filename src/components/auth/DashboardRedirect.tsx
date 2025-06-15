@@ -20,13 +20,8 @@ const DashboardRedirect: React.FC = () => {
     );
   }
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated || !user) {
     console.log('DashboardRedirect - not authenticated, redirecting to login');
-    return <Navigate to="/login" replace />;
-  }
-
-  if (!user) {
-    console.log('DashboardRedirect - no user, redirecting to login');
     return <Navigate to="/login" replace />;
   }
 
